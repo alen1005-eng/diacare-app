@@ -1,100 +1,90 @@
 import streamlit as st
 
-# Postavke stranice za profesionalni medicinski izgled
-st.set_page_config(page_title="DiaCare AI - Final CDS Tool", page_icon="💊", layout="wide")
+# Postavke stranice - Profesionalni medicinski stil
+st.set_page_config(page_title="DiaCare AI - Klinička Podrška", page_icon="💊", layout="wide")
 
 st.markdown("""
     <style>
-    .main { background-color: #f4f7f9; }
-    .stButton>button { width: 100%; background-color: #004a99; color: white; font-weight: bold; border-radius: 8px; height: 3.5em; }
-    .metric-card { background-color: white; padding: 20px; border-radius: 12px; border: 1px solid #e0e6ed; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .intervention-card { background-color: #ffffff; padding: 25px; border-radius: 15px; border-left: 10px solid #004a99; }
+    .main { background-color: #f8fafc; }
+    .stButton>button { background-color: #1e40af; color: white; border-radius: 8px; font-weight: 600; }
+    .risk-card { padding: 25px; border-radius: 15px; background-color: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .benefit-box { background-color: #eff6ff; padding: 15px; border-radius: 10px; border-left: 5px solid #3b82f6; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("💊 DiaCare: Klinički AI sustav za podršku odlučivanju (CDS)")
-st.write("Personalizirana stratifikacija rizika i plan intervencije za novo dijagnosticirane T2DM pacijente.")
+st.title("💊 DiaCare: Sustav za podršku odlučivanju (CDS)")
+st.caption("Alat za automatiziranu stratifikaciju rizika novo dijagnosticiranih T2DM pacijenata u RH.")
 
-# --- SIDEBAR: ULAZNE VARIJABLE (Izvor: 6_1.png / 6_2.png) ---
-st.sidebar.header("📋 Ulazni podaci o pacijentu")
+# --- SIDEBAR: INPUT VARIJABLE (Prema odjeljku 6.2 dokumenta) ---
+st.sidebar.header("📋 Klinički ulazni podaci")
 with st.sidebar:
-    is_new_dx = st.radio("Dijagnoza postavljena u posljednjih 6 mjeseci?", ["DA", "NE"])
+    # 4 ključne varijable iz odjeljka 6.2 [cite: 304]
+    is_new = st.radio("Je li dijagnoza postavljena u posljednjih 6 mjeseci?", ["DA", "NE"])
     age = st.number_input("Dob pacijenta (godine):", 18, 100, 45)
-    drug_count = st.number_input("Broj različitih lijekova u tekućoj terapiji:", 0, 20, 4)
-    hba1c_present = st.radio("HbA1c mjerenje u posljednjih 6 mjeseci?", ["DA", "NE"])
+    med_count = st.number_input("Broj različitih lijekova u tekućoj terapiji:", 0, 20, 3)
+    hba1c_done = st.radio("HbA1c mjerenje u posljednjih 6 mjeseci?", ["DA", "NE"])
     st.markdown("---")
-    if st.button("POKRENI ANALIZU"):
-        st.session_state.analyzed = True
+    run_analysis = st.button("POKRENI STRATIFIKACIJU")
 
-# --- LOGIKA STRATIFIKACIJE (Izvor: 6_1.png) ---
-if st.session_state.get('analyzed'):
-    if is_new_dx == "NE":
-        tier = "Ostali"
+# --- LOGIKA I PRIKAZ (Prema odjeljku 6.3 i 6.4 dokumenta) ---
+if run_analysis:
+    if is_new == "NE":
+        tier_label = "Ostali pacijenti (Dugogodišnji)"
         rate = "17.5%"
-        risk_label = "STABILAN RIZIK"
-        color = "#2E86C1"
-        plan = ["Standardni protokol praćenja (svakih 6-12 mjeseci)."]
+        color = "#64748b"
+        plan = ["Standardni protokol praćenja i kontrole."]
     else:
-        # Primjena logike iz odjeljka 6.3 dokumenta
-        if age < 50 and (drug_count >= 3 or hba1c_present == "NE"):
-            tier = "Visoki rizik"
+        # Logika iz vašeg dokumenta (Odjeljak 6.3)
+        if age < 50 and (med_count >= 3 or hba1c_done == "NE"):
+            tier_label = "VISOKI RIZIK (Tier 1)"
             rate = "46.4%"
-            risk_label = "VISOKI RIZIK (TIER 1)"
-            color = "#C0392B"
+            color = "#ef4444"
             plan = [
-                "**DESMOND program:** Šestosatna strukturirana edukacija",
-                "**Case management:** Individualno farmaceutsko savjetovanje",
-                "**SMS podsjetnici:** Automatizirana podrška (poboljšava adherenciju do 50%)",
-                "**Follow-up:** Obavezan pregled za 2 tjedna"
+                "**DESMOND program:** 6-satna grupna edukacija [cite: 270]",
+                "**Case management:** Individualno farmaceutsko savjetovanje [cite: 272]",
+                "**Digitalna podrška:** SMS podsjetnici (povećanje adherencije na 50%) [cite: 273]",
+                "**Follow-up:** Obavezan pregled za 14 dana [cite: 275]"
             ]
-        elif age >= 55 and drug_count <= 1 and hba1c_present == "DA":
-            tier = "Nizak rizik"
+        elif age > 55 and med_count <= 1 and hba1c_done == "DA":
+            tier_label = "NIZAK RIZIK (Tier 3)"
             rate = "24.2%"
-            risk_label = "NIZAK RIZIK (TIER 3)"
-            color = "#27AE60"
-            plan = ["Edukacijski materijali (pisani + digitalni)", "Rutinski follow-up za 3 mjeseca"]
+            color = "#22c55e"
+            plan = ["Edukacijski materijali (pisani i digitalni)", "Rutinska kontrola za 3 mjeseca [cite: 282]"]
         else:
-            tier = "Umjereni rizik"
+            tier_label = "UMJERENI RIZIK (Tier 2)"
             rate = "36.2%"
-            risk_label = "UMJERENI RIZIK (TIER 2)"
-            color = "#E67E22"
-            plan = [
-                "Standardna DESMOND edukacija u grupi",
-                "SMS podsjetnici 2x tjedno",
-                "Follow-up za 1 mjesec"
-            ]
+            color = "#f59e0b"
+            plan = ["Standardna DESMOND edukacija", "SMS podsjetnici 2x tjedno", "Follow-up za 1 mjesec [cite: 279]"]
 
-    # --- PRIKAZ REZULTATA ---
+    # --- GLAVNI PRIKAZ REZULTATA ---
     col1, col2 = st.columns([1, 1.5])
-    
+
     with col1:
         st.markdown(f"""
-            <div class="metric-card" style="border-top: 8px solid {color};">
-                <h3 style="color: {color}; margin-bottom: 5px;">{risk_label}</h3>
-                <p style="font-size: 1.2em;">Procijenjena neadherencija: <b>{rate}</b></p>
+            <div class="risk-card" style="border-top: 10px solid {color};">
+                <h3 style="color: {color}; margin: 0;">{tier_label}</h3>
+                <p style="font-size: 1.1em; color: #475569;">Očekivana stopa neadherencije: <b>{rate}</b></p>
                 <hr>
-                <p><b>Pacijent profil:</b> Novo dijagnosticirani T2DM</p>
-                <p><b>Target PDC prag:</b> ≥ 0.80</p>
+                <p><b>Napomena:</b> Rana adherencija stvara <i>'Legacy Effect'</i> koji smanjuje rizik od budućih komplikacija.</p>
             </div>
         """, unsafe_allow_html=True)
         
-        st.metric("Povezanost s ishodom", "-0.1% HbA1c", "po +10% adherencije", delta_color="normal")
+        st.metric("Potencijal poboljšanja HbA1c", "-0.1%", "za svakih +10% adherencije")
 
     with col2:
-        st.markdown(f"""<div class="intervention-card">
-            <h4>📋 Preporučeni plan intervencije</h4>""", unsafe_allow_html=True)
-        for p in plan:
-            st.write(p)
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.subheader("🛠️ Predloženi plan intervencije")
+        for step in plan:
+            st.markdown(f"- {step}")
+        
+        st.markdown(f"""
+            <div class="benefit-box">
+                <b>Ekonomska opravdanost:</b><br>
+                Liječenje komplikacija čini 85,72% troškova dijabetesa u RH[cite: 163]. 
+                Godišnji trošak pacijenta bez komplikacija iznosi cca <b>1.956 EUR</b>.
+            </div>
+        """, unsafe_allow_html=True)
 
-    # --- EKONOMSKI OKVIR (Izvor: 5_1.png) ---
     st.markdown("---")
-    st.subheader("📊 Ekonomska i klinička opravdanost")
-    ec1, ec2, ec3 = st.columns(3)
-    ec1.metric("Trošak komplikacija u RH", "85.72%", "ukupnih izdataka T2DM")
-    ec2.metric("Trošak intervencije (cca)", "£76", "po pacijentu")
-    ec3.metric("Godišnja ušteda", "1.750 EUR", "per adherentni pacijent")
-
-    st.caption("🛡️ Trustworthy AI: Procjena utemeljena na modelu validiranom unutar SPE okruženja na 11.894 pacijenata.")
+    st.caption("Izvor podataka: Analiza kohorte n=11.894 (CroDiab / HZZO) | DiaCare CDS Prototip V1.0")
 else:
-    st.info("Dobrodošli u DiaCare CDS alat. Unesite parametre pacijenta u izbornik s lijeve strane za početak trijaže.")
+    st.info("Molimo unesite podatke o pacijentu kako biste generirali plan intervencije.")
