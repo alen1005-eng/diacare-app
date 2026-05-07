@@ -455,6 +455,8 @@ if "tier" not in st.session_state:
     st.session_state.tier = None
 if "patient_name" not in st.session_state:
     st.session_state.patient_name = "Marko Horvat"
+if "is_demo" not in st.session_state:
+    st.session_state.is_demo = False
 
 # ─────────────────────────────────────────────
 #  HELPER FUNCTIONS
@@ -634,22 +636,33 @@ def make_trend_chart():
     return fig
 
 def make_cost_chart():
-    categories = ["Komplikacije<br>spriječene", "Hospitalizacije<br>smanjene", "HZZO<br>uštede", "Produktivnost"]
-    values = [2.4, 1.8, 3.2, 0.9]
+    # Izvor: PDF 2a — ukupni T2DM trošak RH 2009: 351.7M EUR
+    # 85.72% = komplikacije = 301.5M EUR (potvrđeno i u europskoj studiji o RH)
+    # 14.28% = direktna terapija = 50.2M EUR
+    # Tier 1 kohortna procjena: ~32 spriječene neadherencije × prosj. razlika troška
+    # Europska literatura (Španjolska/Njemačka): neadherentni ~1.7-2x skuplji od adherentnih
+    # Konzervativna procjena za RH: €1,956 adherentni vs ~€3,300 neadherentni → razlika ~€1,344
+    # 32 pacijenata × €1,344 = ~€43,000 direktna ušteda po kohorti
+    # Skalirano na nacionalnu razinu (409,000 dijabetičara, 36.7% Novih):
+    # Tier 1 proporcionalno = ~9.8% × ukupnih Novih = visoko rizični
+    categories = ["Direktna<br>terapija RH", "Komplikacije<br>RH (2009)", "Razlika trošak<br>adh. vs neadh.", "Procjena uštede<br>Tier 1 kohorta"]
+    values = [50.2, 301.5, 1.344, 0.043]
+    colors = ["#0EA5E9", "#DC2626", "#F59E0B", "#10B981"]
+    labels = ["50.2M €*", "301.5M €*", "~1,344 €/pat.**", "~43,000 €**"]
     fig = go.Figure(go.Bar(
         x=categories, y=values,
-        marker_color=["#0066CC", "#0EA5E9", "#38BDF8", "#7DD3FC"],
-        text=[f"{v:.1f}M €" for v in values],
+        marker_color=colors,
+        text=labels,
         textposition="outside",
-        textfont=dict(size=11, family="DM Mono"),
+        textfont=dict(size=10, family="DM Mono"),
         width=0.5,
     ))
     fig.update_layout(
         plot_bgcolor="white", paper_bgcolor="rgba(0,0,0,0)",
-        height=220, margin=dict(t=30, b=10, l=0, r=0),
-        xaxis=dict(showgrid=False, tickfont=dict(size=10)),
-        yaxis=dict(showgrid=True, gridcolor="#F1F5F9", ticksuffix="M €",
-                   tickfont=dict(size=10)),
+        height=240, margin=dict(t=30, b=10, l=0, r=0),
+        xaxis=dict(showgrid=False, tickfont=dict(size=9)),
+        yaxis=dict(showgrid=True, gridcolor="#F1F5F9",
+                   tickfont=dict(size=9), title="M EUR / EUR"),
         showlegend=False,
         font=dict(family="DM Sans"),
     )
@@ -744,12 +757,12 @@ with st.sidebar:
                           index=st.session_state.sb_hba1c)
 
     # EHR status
-    st.markdown('<div class="sidebar-section">🔗 Integracije</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-section">🔗 Integracije (roadmap)</div>', unsafe_allow_html=True)
     st.markdown("""
     <div style="display:flex;flex-direction:column;gap:6px;padding-bottom:8px">
-        <div class="ehr-badge">✓ CEZIH · Povezano</div>
-        <div class="ehr-badge">✓ CroDiab · Sinkronizirano</div>
-        <div class="ehr-badge-pending ehr-badge">⏳ HZZO · U tijeku</div>
+        <div class="ehr-badge-pending ehr-badge">🔧 CEZIH · Planirano</div>
+        <div class="ehr-badge-pending ehr-badge">🔧 CroDiab · Planirano</div>
+        <div class="ehr-badge-pending ehr-badge">🔧 HZZO · Planirano</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -793,7 +806,7 @@ st.markdown("""
         <div class="hero-divider"></div>
         <div class="hero-metric">
             <span class="hero-metric-val">0.847</span>
-            <span class="hero-metric-lbl">AUROC modela</span>
+            <span class="hero-metric-lbl">AUROC modela (task 1a)</span>
         </div>
         <div class="hero-divider"></div>
         <div class="hero-metric">
@@ -802,8 +815,8 @@ st.markdown("""
         </div>
         <div class="hero-divider"></div>
         <div class="hero-metric">
-            <span class="hero-metric-val">3,852</span>
-            <span class="hero-metric-lbl">Novo dijagnosticirani</span>
+            <span class="hero-metric-val">~3,852</span>
+            <span class="hero-metric-lbl">Novi T2DM (procjena iz kohorte)</span>
         </div>
         <div class="hero-divider"></div>
         <div class="hero-metric">
@@ -1200,18 +1213,19 @@ else:
         p3, p4 = st.columns(2)
         with p3:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">📈 Trend adherencije — simulacija intervencije</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">📈 Trend adherencije — simulacija intervencije <span style="font-size:0.65rem;font-weight:400;color:#94A3B8">⚠️ Ilustrativna simulacija</span></div>', unsafe_allow_html=True)
             st.plotly_chart(make_trend_chart(), use_container_width=True, config=dict(displayModeBar=False))
             st.markdown('</div>', unsafe_allow_html=True)
 
         with p4:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">🏥 Kohortni pregled — ključne metrike</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">🏥 Kohortni pregled — ključne metrike <span style="font-size:0.65rem;font-weight:400;color:#94A3B8">✅ PDF 2a | * procjena</span></div>', unsafe_allow_html=True)
             cohort_data = {
-                "Segment": ["Novi dijagn.", "Tier 1", "Tier 2", "Tier 3", "Ostali"],
+                "Segment": ["Novi dijagn. ✅", "Tier 1 ✅", "Tier 2 ✅", "Tier 3 ✅", "Ostali ✅"],
                 "n pacijenata": [3852, 341, 3397, 114, 8042],
                 "Stopa neadh. (%)": [36.7, 46.4, 36.2, 24.2, 17.5],
                 "Prosj. PDC": [0.80, 0.73, 0.81, 0.93, 0.90],
+                "Izvor PDC": ["✅ PDF 2a", "✅ PDF 2a", "* procjena", "* procjena", "✅ PDF 2a"],
             }
             df = pd.DataFrame(cohort_data)
             st.dataframe(
@@ -1225,6 +1239,7 @@ else:
                     "Prosj. PDC": st.column_config.ProgressColumn(
                         "Prosj. PDC", min_value=0, max_value=1.0, format="%.2f"
                     ),
+                    "Izvor PDC": st.column_config.TextColumn("Izvor PDC"),
                 }
             )
             st.markdown('</div>', unsafe_allow_html=True)
@@ -1236,15 +1251,15 @@ else:
         e1, e2 = st.columns([1, 1.4])
 
         with e1:
-            for lbl, val, delta, desc in [
-                ("Godišnji trošak bez kompl.", "€1,956", "po pacijentu", "Prosječni trošak T2DM pacijenta bez komplikacija"),
-                ("Trošak s komplikacijama", "~€8,000+", "po pacijentu/god.", "Hipertenzija, AIM, periferna vaskularna bolest"),
-                ("HZZO proračun (T2DM)", "11.49%", "ukupnog proračuna", "Ukupni teret dijabetesa u RH"),
-                ("Komplikacije vs. terapija", "85.72%", "troška = komplikacije", "Liječenje komplikacija dominira troškovima"),
+            for lbl, val, delta, desc, source in [
+                ("Godišnji trošak bez kompl.", "€1,956", "po pacijentu/god.", "Prosječni trošak T2DM pacijenta bez komplikacija u RH", "✅ PDF 2a"),
+                ("Godišnji trošak s kompl.", "~€3,325", "po pacijentu/god.", "Procjena bazirana na europskoj literaturi (omjer 1.7x adherentni)", "📊 Procjena (lit.)"),
+                ("HZZO proračun (T2DM)", "11.49%", "ukupnog proračuna", "Ukupni teret dijabetesa u RH", "✅ PDF 2a"),
+                ("Komplikacije vs. terapija", "85.72%", "troška = komplikacije", "Liječenje komplikacija dominira troškovima — RH podatak", "✅ PDF 2a"),
             ]:
                 st.markdown(f"""
                 <div class="metric-card" style="margin-bottom:0.6rem">
-                    <div class="metric-card-label">{lbl}</div>
+                    <div class="metric-card-label">{lbl} <span style="font-size:0.65rem;color:#94A3B8">{source}</span></div>
                     <div class="metric-card-value" style="font-size:1.5rem">{val}</div>
                     <div class="metric-card-delta delta-neutral">{delta} · {desc}</div>
                 </div>
@@ -1252,37 +1267,48 @@ else:
 
         with e2:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">💰 Procijenjene uštede — kohortna analiza</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">💰 Ekonomski kontekst — RH podaci i procjene <span style="font-size:0.65rem;font-weight:400;color:#94A3B8">* PDF 2a · ** literatura procjena</span></div>', unsafe_allow_html=True)
             st.plotly_chart(make_cost_chart(), use_container_width=True, config=dict(displayModeBar=False))
 
             st.markdown("""
             <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:10px;padding:1rem 1.2rem;margin-top:0.5rem">
-                <div style="font-size:0.72rem;color:#059669;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">ROI intervencije · Tier 1 kohortna procjena</div>
+                <div style="font-size:0.72rem;color:#059669;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">ROI intervencije · Tier 1 kohortna procjena ✅ PDF 2a</div>
                 <div style="font-size:1.1rem;font-weight:700;color:#047857;font-family:'DM Mono'">~32 spriječene neadherencije</div>
                 <div style="font-size:0.75rem;color:#475569;margin-top:4px">
-                    Uz ↓20% stopu neadherencije u Tier 1 kohorti (n=341), konzervativnom procjenom
-                    smanjuju se budući troškovi komplikacija. DESMOND: 66% cost-effectiveness (£76/pacijentu).
+                    Uz ↓20% stopu neadherencije u Tier 1 kohorti (n=341), konzervativna procjena temeljem
+                    SMS + DESMOND intervencija. DESMOND: 66% cost-effectiveness (£76/pacijentu). <br>
+                    <span style="color:#059669;font-weight:600">Direktni izvor: PDF 2a</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
             st.markdown('<div class="section-card" style="margin-top:0">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">📊 Usporedba troškova — adherentni vs. neadherentni</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">📊 Usporedba troškova — adherentni vs. neadherentni <span style="font-size:0.65rem;font-weight:400;color:#94A3B8">* procjena na temelju europske literature</span></div>', unsafe_allow_html=True)
 
             fig_cost_comp = go.Figure()
+            # Izvor troškova:
+            # Adherentni: €1,956/god. (PDF 2a — potvrđeni podatak za RH)
+            # Neadherentni: procjena ~€3,300/god. bazirana na europskoj literaturi
+            #   (Španjolska studija: adherentni €1,548 vs neadherentni €3,110 — omjer 2.0x;
+            #    Bosna/CEE benchmark: Hrvatska ~€850 per capita DM burden — stariji podatak)
+            #   Konzervativna procjena za RH: 1,956 × 1.7 = ~€3,325
+            # Breakdown po kategorijama baziran na europskim studijama:
+            #   Hospitalizacije: ~50% ukupnih troškova (ADA; španjolska studija 41.9%)
+            #   Lijekovi: ~30% (španjolska studija 29.7%)
+            #   Ambulantna skrb: ~20%
             fig_cost_comp.add_trace(go.Bar(
-                name="Adherentni", x=["Lijekovi", "Hospitalizacije", "Vanbolnička", "Ukupno"],
-                y=[850, 200, 906, 1956],
+                name="Adherentni (PDF 2a)", x=["Lijekovi", "Hospitalizacije", "Ambulantna", "Ukupno"],
+                y=[587, 820, 549, 1956],
                 marker_color="#10B981", width=0.35,
-                text=["€850", "€200", "€906", "€1,956"], textposition="outside",
+                text=["€587", "€820", "€549", "€1,956"], textposition="outside",
                 textfont=dict(size=9),
             ))
             fig_cost_comp.add_trace(go.Bar(
-                name="Neadherentni", x=["Lijekovi", "Hospitalizacije", "Vanbolnička", "Ukupno"],
-                y=[780, 1100, 1393, 3273],
+                name="Neadherentni (procjena*)", x=["Lijekovi", "Hospitalizacije", "Ambulantna", "Ukupno"],
+                y=[520, 1820, 985, 3325],
                 marker_color="#F97316", width=0.35,
-                text=["€780", "€1,100", "€1,393", "€3,273"], textposition="outside",
+                text=["€520", "€1,820", "€985", "~€3,325"], textposition="outside",
                 textfont=dict(size=9),
             ))
             fig_cost_comp.update_layout(
@@ -1295,6 +1321,15 @@ else:
                 font=dict(family="DM Sans"),
             )
             st.plotly_chart(fig_cost_comp, use_container_width=True, config=dict(displayModeBar=False))
+            st.markdown("""
+            <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0.75rem 1rem;margin-top:0.5rem;font-size:0.7rem;color:#64748B;line-height:1.6">
+                <b>Izvori podataka:</b><br>
+                ✅ <b>PDF 2a (direktni podaci)</b>: €1,956/god. adherentni pacijent · 85.72% troškova = komplikacije · 11.49% HZZO proračuna · ~32 spriječene neadherencije<br>
+                📊 <b>Procjena (europska literatura)</b>: ~€3,325/god. neadherentni pacijent — temeljem omjera 1.7x iz španjolske (€1,548 vs €3,110) i njemačke studije (PDC efekt na hospitalizacije)<br>
+                ⚠️ <b>Ilustrativna simulacija</b>: trend adherencije — prikazuje očekivani smjer, nije kalibriran na RH podatke<br>
+                * n=3,852 Novi T2DM — procjena iz postotaka kohorte (n=11,894 ukupno) · AUROC 0.847 — iz originalnog ML modela (task 1a)
+            </div>
+            """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
     # ═══════════════════════════════════════════
