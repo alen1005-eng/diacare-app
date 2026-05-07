@@ -651,6 +651,20 @@ def make_cost_chart():
     return fig
 
 # ─────────────────────────────────────────────
+#  SESSION STATE DEFAULTS
+# ─────────────────────────────────────────────
+if "sb_is_new" not in st.session_state:
+    st.session_state.sb_is_new   = 0   # index: 0=DA, 1=NE
+if "sb_age" not in st.session_state:
+    st.session_state.sb_age      = 45
+if "sb_med" not in st.session_state:
+    st.session_state.sb_med      = 3
+if "sb_hba1c" not in st.session_state:
+    st.session_state.sb_hba1c    = 1   # index: 0=DA, 1=NE
+if "sb_name" not in st.session_state:
+    st.session_state.sb_name     = "Marko Horvat"
+
+# ─────────────────────────────────────────────
 #  SIDEBAR
 # ─────────────────────────────────────────────
 with st.sidebar:
@@ -661,43 +675,47 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # DEMO SCENARIOS
+    # DEMO SCENARIOS — set session state then rerun
     st.markdown('<div class="sidebar-section">⚡ Demo scenariji</div>', unsafe_allow_html=True)
     col_s1, col_s2, col_s3 = st.columns(3)
-    demo_mode = None
     with col_s1:
         if st.button("🔴\nVisoki", use_container_width=True):
-            demo_mode = "high"
+            st.session_state.sb_is_new = 0
+            st.session_state.sb_age    = 42
+            st.session_state.sb_med    = 4
+            st.session_state.sb_hba1c  = 1
+            st.session_state.sb_name   = "Marko Horvat"
+            st.rerun()
     with col_s2:
         if st.button("🟡\nSrednji", use_container_width=True):
-            demo_mode = "medium"
+            st.session_state.sb_is_new = 0
+            st.session_state.sb_age    = 52
+            st.session_state.sb_med    = 2
+            st.session_state.sb_hba1c  = 0
+            st.session_state.sb_name   = "Ana Kovač"
+            st.rerun()
     with col_s3:
         if st.button("🟢\nNizak", use_container_width=True):
-            demo_mode = "low"
+            st.session_state.sb_is_new = 0
+            st.session_state.sb_age    = 61
+            st.session_state.sb_med    = 1
+            st.session_state.sb_hba1c  = 0
+            st.session_state.sb_name   = "Ivan Blažević"
+            st.rerun()
 
     st.markdown('<div class="sidebar-section">👤 Podaci pacijenta</div>', unsafe_allow_html=True)
-
-    patient_name = st.text_input("Ime pacijenta", value="Marko Horvat")
+    patient_name = st.text_input("Ime pacijenta", value=st.session_state.sb_name)
 
     st.markdown('<div class="sidebar-section">📋 Klinički unos</div>', unsafe_allow_html=True)
 
-    # Pre-fill from demo mode
-    if demo_mode == "high":
-        def_new, def_age, def_med, def_hba1c = "DA", 42, 4, "NE"
-    elif demo_mode == "medium":
-        def_new, def_age, def_med, def_hba1c = "DA", 52, 2, "DA"
-    elif demo_mode == "low":
-        def_new, def_age, def_med, def_hba1c = "DA", 61, 1, "DA"
-    else:
-        def_new  = st.session_state.get("is_new_val", "DA")
-        def_age  = st.session_state.get("age_val", 45)
-        def_med  = st.session_state.get("med_val", 3)
-        def_hba1c= st.session_state.get("hba1c_val", "NE")
-
-    is_new    = st.radio("Dijagnoza u zadnjih 6 mj?", ["DA", "NE"], index=0 if def_new=="DA" else 1)
-    age       = st.number_input("Dob (godine)", 18, 100, def_age)
-    med_count = st.number_input("Broj lijekova", 0, 20, def_med)
-    hba1c_done= st.radio("HbA1c u zadnjih 6 mj?", ["DA", "NE"], index=0 if def_hba1c=="DA" else 1)
+    is_new     = st.radio("Dijagnoza u zadnjih 6 mj?", ["DA", "NE"],
+                          index=st.session_state.sb_is_new)
+    age        = st.number_input("Dob (godine)", 18, 100,
+                                 value=st.session_state.sb_age)
+    med_count  = st.number_input("Broj lijekova", 0, 20,
+                                 value=st.session_state.sb_med)
+    hba1c_done = st.radio("HbA1c u zadnjih 6 mj?", ["DA", "NE"],
+                          index=st.session_state.sb_hba1c)
 
     # EHR status
     st.markdown('<div class="sidebar-section">🔗 Integracije</div>', unsafe_allow_html=True)
@@ -712,16 +730,20 @@ with st.sidebar:
     st.markdown("---")
     run = st.button("🔍  ANALIZIRAJ PACIJENTA", use_container_width=True)
 
-    if run or demo_mode:
-        st.session_state.analyzed   = True
+    if run:
+        st.session_state.analyzed     = True
         st.session_state.patient_name = patient_name
-        tier_code, non_adh_rate     = classify_patient(is_new, age, med_count, hba1c_done)
-        st.session_state.tier        = tier_code
-        st.session_state.rate        = non_adh_rate
-        st.session_state.age         = age
-        st.session_state.med_count   = med_count
-        st.session_state.hba1c_done  = hba1c_done
-        st.session_state.is_new      = is_new
+        st.session_state.sb_is_new    = 0 if is_new == "DA" else 1
+        st.session_state.sb_age       = age
+        st.session_state.sb_med       = med_count
+        st.session_state.sb_hba1c     = 0 if hba1c_done == "DA" else 1
+        tier_code, non_adh_rate       = classify_patient(is_new, age, med_count, hba1c_done)
+        st.session_state.tier         = tier_code
+        st.session_state.rate         = non_adh_rate
+        st.session_state.age          = age
+        st.session_state.med_count    = med_count
+        st.session_state.hba1c_done   = hba1c_done
+        st.session_state.is_new       = is_new
 
     st.caption("AI4Health.Cro · Zadatak 2b · DiaCare CDS")
 
