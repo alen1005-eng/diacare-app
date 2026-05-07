@@ -877,7 +877,7 @@ else:
 
         with g_col:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
-            st.plotly_chart(make_gauge(rate), use_container_width=True, config=dict(displayModeBar=False))
+            st.plotly_chart(make_gauge(rate, tier), use_container_width=True, config=dict(displayModeBar=False))
             # Probability bar
             st.markdown(f"""
             <div style="margin-top:-0.5rem">
