@@ -441,7 +441,8 @@ html, body, [data-testid="stAppViewContainer"] {
 .divider { height: 1px; background: #F1F5F9; margin: 1rem 0; }
 
 /* Hide streamlit default elements */
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
 .block-container { padding-top: 1rem !important; padding-bottom: 2rem !important; max-width: 1400px !important; }
 </style>
 """, unsafe_allow_html=True)
