@@ -694,7 +694,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     # DEMO SCENARIOS — set session state then rerun
-    st.markdown('<div class="sidebar-section">⚡ Demo scenariji</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-section">⚡ Demo scenariji (sintetski pacijenti)</div>', unsafe_allow_html=True)
     col_s1, col_s2, col_s3 = st.columns(3)
     with col_s1:
         if st.button("🔴\nVisoki", use_container_width=True):
@@ -704,6 +704,7 @@ with st.sidebar:
             st.session_state.sb_hba1c  = 1
             st.session_state.sb_name   = "Marko Horvat"
             st.session_state.analyzed  = True
+            st.session_state.is_demo   = True
             tier_code, non_adh_rate    = classify_patient("DA", 42, 4, "NE")
             st.session_state.tier      = tier_code
             st.session_state.rate      = non_adh_rate
@@ -719,6 +720,7 @@ with st.sidebar:
             st.session_state.sb_hba1c  = 0
             st.session_state.sb_name   = "Ana Kovač"
             st.session_state.analyzed  = True
+            st.session_state.is_demo   = True
             tier_code, non_adh_rate    = classify_patient("DA", 52, 2, "DA")
             st.session_state.tier      = tier_code
             st.session_state.rate      = non_adh_rate
@@ -734,6 +736,7 @@ with st.sidebar:
             st.session_state.sb_hba1c  = 0
             st.session_state.sb_name   = "Ivan Blažević"
             st.session_state.analyzed  = True
+            st.session_state.is_demo   = True
             tier_code, non_adh_rate    = classify_patient("DA", 61, 1, "DA")
             st.session_state.tier      = tier_code
             st.session_state.rate      = non_adh_rate
@@ -771,6 +774,7 @@ with st.sidebar:
 
     if run:
         st.session_state.analyzed     = True
+        st.session_state.is_demo      = False
         st.session_state.patient_name = patient_name
         st.session_state.sb_is_new    = 0 if is_new == "DA" else 1
         st.session_state.sb_age       = age
@@ -864,6 +868,37 @@ else:
     med_v     = st.session_state.med_count
     hba1c_v   = st.session_state.hba1c_done
     is_new_v  = st.session_state.is_new
+
+    # ── Demo / Prototype banner ──
+    is_demo = st.session_state.get("is_demo", False)
+    if is_demo:
+        st.markdown("""
+        <div style="background:#FFF7ED;border:1px solid #FED7AA;border-left:4px solid #F97316;
+                    border-radius:8px;padding:0.6rem 1rem;margin-bottom:0.75rem;
+                    display:flex;align-items:center;gap:10px">
+            <span style="font-size:1rem">🧪</span>
+            <div>
+                <span style="font-size:0.78rem;font-weight:700;color:#C2410C">DEMO MODE · Sintetski pacijent · Fiktivni scenarij za prikaz</span>
+                <span style="font-size:0.72rem;color:#92400E;margin-left:0.5rem">
+                    Statistike temeljene na stvarnim podacima (CroDiab/HZZO, n=11,894 · PDF 2a)
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-left:4px solid #3B82F6;
+                    border-radius:8px;padding:0.6rem 1rem;margin-bottom:0.75rem;
+                    display:flex;align-items:center;gap:10px">
+            <span style="font-size:1rem">⚠️</span>
+            <div>
+                <span style="font-size:0.78rem;font-weight:700;color:#1D4ED8">PROTOTIP · Rule-based CDS · Nije certificirani medicinski uređaj</span>
+                <span style="font-size:0.72rem;color:#1E40AF;margin-left:0.5rem">
+                    Konačna klinička odluka uvijek ostaje na liječniku
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     today = datetime.today()
 
@@ -1015,8 +1050,11 @@ else:
                 </div>
                 {make_shap_chart(tier)}
                 <div style="margin-top:1rem;padding:0.75rem;background:#F8FAFC;border-radius:8px;font-size:0.74rem;color:#64748B">
-                    <b>Metodološka napomena:</b> SHAP vrijednosti derivirane su iz Random Forest modela
-                    treniranog na kohorti n=11,894. AUROC=0.847. Kalibracija provedena Platt skaliranjem.
+                    <b>Metodološka napomena:</b> Prikazane SHAP-like vrijednosti ilustriraju relativnu važnost
+                    kliničkih prediktora identificiranih analizom kohorte (n=11,894, PDF 2a). Ovaj prototip
+                    koristi <b>rule-based logiku stratifikacije</b> — ne stvarni ML model. AUROC 0.847
+                    odnosi se na Random Forest model iz zadatka 1a koji nije integriran u ovaj prototip.
+                    Kalibracija prediktora bazirana na Platt skaliranju opisana je u task 1a dokumentaciji.
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -1176,7 +1214,7 @@ else:
             # SMS Module mockup
             st.markdown("""
             <div class="section-card" style="margin-top:0">
-                <div class="section-title">📱 SMS Adherencija modul</div>
+                <div class="section-title">📱 SMS Adherencija modul <span style="font-size:0.65rem;font-weight:400;color:#94A3B8">🔧 Mock prikaz · Roadmap funkcionalnost</span></div>
                 <div style="background:#0A1628;border-radius:10px;padding:1rem;font-family:'DM Mono',monospace">
                     <div style="font-size:0.68rem;color:#38BDF8;margin-bottom:0.5rem">DiaCare SMS · Automatski podsjt.</div>
                     <div style="background:#1E3A5F;border-radius:6px;padding:0.6rem;margin-bottom:0.4rem">
@@ -1345,19 +1383,19 @@ else:
             workflow_steps = [
                 ("1", "#0066CC", "Identifikacija pacijenta",
                  "Novo dijagnosticirani T2DM pacijent dolazi u ordinaciju obiteljske medicine. Liječnik otvara DiaCare AI.",
-                 "EHR integracija · CEZIH automatski popunjava podatke"),
-                ("2", "#7C3AED", "AI Scoring & Stratifikacija",
-                 "Sustav automatski procesira 4 klinička prediktora i klasificira pacijenta u Tier 1/2/3 za <1 sekundu.",
-                 "Model: Random Forest · AUROC 0.847 · SHAP explainability"),
+                 "🔧 Roadmap: EHR integracija s CEZIH"),
+                ("2", "#7C3AED", "Rule-based Stratifikacija",
+                 "Sustav procesira 4 klinička prediktora i klasificira pacijenta u Tier 1/2/3 temeljem logike izvedene iz analize kohorte n=11,894.",
+                 "✅ Implementirano u prototipu · Logika iz PDF 2a"),
                 ("3", "#D97706", "Prezentacija liječniku",
-                 "Liječnik vidi jasnu vizualizaciju rizika, SHAP objašnjenje i personalizirani plan intervencije.",
-                 "Traffic-light indikator · Klinička interpretacija · XAI panel"),
+                 "Liječnik vidi jasnu vizualizaciju rizika, SHAP-like objašnjenje i personalizirani plan intervencije.",
+                 "✅ Implementirano · Prototip prikaz"),
                 ("4", "#059669", "Inicijacija intervencije",
-                 "Liječnik jednim klikom pokreće odgovarajuću intervenciju: DESMOND upis, SMS aktivacija, case management referral.",
-                 "Integrirano s HZZO sustavom · Automatski SMS modul"),
+                 "Liječnik odabire odgovarajuću intervenciju: DESMOND upis, SMS aktivacija, case management referral.",
+                 "🔧 Roadmap: automatska integracija s HZZO"),
                 ("5", "#0EA5E9", "Follow-up & Outcome tracking",
-                 "Sustav automatski zakazuje follow-up termine i prati PDC vrijednost pacijenta kroz vrijeme.",
-                 "PDC monitoring · Automatski alert ako PDC <0.80"),
+                 "Sustav prati PDC vrijednost pacijenta i generira follow-up podsjetnike.",
+                 "🔧 Roadmap: PDC monitoring modul"),
             ]
 
             for num, color, title, desc, tech in workflow_steps:
@@ -1383,33 +1421,33 @@ else:
             # EHR Integration panel
             st.markdown("""
             <div class="section-card">
-                <div class="section-title">🔗 EHR Integracije</div>
+                <div class="section-title">🔗 EHR Integracije — Roadmap</div>
                 <div style="display:flex;flex-direction:column;gap:0.6rem">
                     <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0.8rem">
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:0.8rem;font-weight:700;color:#0F172A">CEZIH</span>
-                            <span class="ehr-badge">✓ Aktivno</span>
+                            <span class="ehr-badge-pending ehr-badge">🔧 Planirana integracija</span>
                         </div>
                         <div style="font-size:0.72rem;color:#64748B;margin-top:3px">Centralni zdravstveni informacijski sustav RH</div>
                     </div>
                     <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0.8rem">
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:0.8rem;font-weight:700;color:#0F172A">CroDiab registar</span>
-                            <span class="ehr-badge">✓ Sinkronizirano</span>
+                            <span class="ehr-badge-pending ehr-badge">🔧 Planirana integracija</span>
                         </div>
                         <div style="font-size:0.72rem;color:#64748B;margin-top:3px">Nacionalni registar dijabetičara</div>
                     </div>
                     <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0.8rem">
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:0.8rem;font-weight:700;color:#0F172A">HZZO Portal</span>
-                            <span class="ehr-badge-pending ehr-badge">⏳ Beta</span>
+                            <span class="ehr-badge-pending ehr-badge">🔧 Planirana integracija</span>
                         </div>
                         <div style="font-size:0.72rem;color:#64748B;margin-top:3px">Recepti, PDC kalkulacija, troškovi</div>
                     </div>
                     <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:0.8rem">
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:0.8rem;font-weight:700;color:#0F172A">HL7 FHIR API</span>
-                            <span class="ehr-badge-pending ehr-badge">🔧 Roadmap</span>
+                            <span class="ehr-badge-pending ehr-badge">🔧 Dugoročni roadmap</span>
                         </div>
                         <div style="font-size:0.72rem;color:#64748B;margin-top:3px">Interoperabilnost s EU zdravstvenim sustavima</div>
                     </div>
@@ -1420,7 +1458,7 @@ else:
             # Automated alerts
             st.markdown("""
             <div class="section-card" style="margin-top:0">
-                <div class="section-title">🔔 Automatski upozorenja sustava</div>
+                <div class="section-title">🔔 Automatski alarmi sustava <span style="font-size:0.65rem;font-weight:400;color:#94A3B8">🔧 Mock prikaz · Roadmap funkcionalnost</span></div>
                 <div style="display:flex;flex-direction:column;gap:0.5rem">
                     <div class="alert-box" style="padding:0.6rem 0.8rem">
                         <h5 style="font-size:0.75rem">⚠️ Visoki rizik — Hitna intervencija</h5>
@@ -1450,7 +1488,7 @@ else:
         </div>
         <div style="display:flex;gap:1rem">
             <span style="font-size:0.7rem;color:#64748B">Kohortna analiza: n=11,894 (CroDiab/HZZO)</span>
-            <span style="font-size:0.7rem;color:#64748B">AUROC: 0.847</span>
+            <span style="font-size:0.7rem;color:#64748B">AUROC: 0.847 (task 1a)</span>
             <span style="font-size:0.7rem;color:#64748B">PDC prag: ≥0.80</span>
         </div>
     </div>
