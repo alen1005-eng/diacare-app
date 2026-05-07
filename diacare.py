@@ -478,30 +478,39 @@ def adherence_prob(rate):
 def make_gauge(value, tier):
     colors = {"high": "#DC2626", "medium": "#F59E0B", "low": "#10B981", "other": "#64748B"}
     color = colors.get(tier, "#64748B")
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=value,
-        number={"suffix": "%", "font": {"size": 28, "family": "DM Mono", "color": "#0F172A"}},
-        gauge={
-            "axis": {"range": [0, 100], "tickfont": {"size": 10, "color": "#94A3B8"}, "tickcolor": "#E2E8F0"},
-            "bar":  {"color": color, "thickness": 0.18},
-            "bgcolor": "#F8FAFC",
-            "borderwidth": 0,
-            "steps": [
-                {"range": [0, 30],  "color": "#F0FDF4"},
-                {"range": [30, 55], "color": "#FFFBEB"},
-                {"range": [55, 100],"color": "#FEF2F2"},
-            ],
-            "threshold": {"line": {"color": "#0F172A", "width": 2}, "thickness": 0.75, "value": value},
-        },
-        title={"text": "Rizik neadherencije", "font": {"size": 12, "color": "#64748B", "family": "DM Sans"}},
-        domain={"x": [0, 1], "y": [0, 1]},
+    # Use a simple horizontal bar gauge (more compatible)
+    fig = go.Figure()
+    # Background bar
+    fig.add_trace(go.Bar(
+        x=[100], y=["Rizik"],
+        orientation="h",
+        marker_color="#F1F5F9",
+        showlegend=False,
+        hoverinfo="skip",
+        width=0.4,
+    ))
+    # Value bar
+    fig.add_trace(go.Bar(
+        x=[value], y=["Rizik"],
+        orientation="h",
+        marker_color=color,
+        showlegend=False,
+        text=f"<b>{value}%</b>",
+        textposition="inside",
+        textfont=dict(size=18, color="white", family="DM Sans"),
+        width=0.4,
+        hovertemplate=f"Rizik neadherencije: {value}%<extra></extra>",
     ))
     fig.update_layout(
-        height=200, margin=dict(t=50, b=10, l=20, r=20),
+        barmode="overlay",
+        height=120,
+        margin=dict(t=30, b=10, l=10, r=10),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"family": "DM Sans"},
+        xaxis=dict(range=[0, 100], showgrid=False, showticklabels=False, zeroline=False),
+        yaxis=dict(showticklabels=False, showgrid=False),
+        title=dict(text="Rizik neadherencije", font=dict(size=12, color="#64748B", family="DM Sans"), x=0.5),
+        font=dict(family="DM Sans"),
     )
     return fig
 
