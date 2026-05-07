@@ -36,34 +36,33 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 [data-testid="stSidebar"] {
-    background: #0A1628 !important;
-    border-right: 1px solid #1E3A5F;
+    background: #F8FAFC !important;
+    border-right: 2px solid #E2E8F0 !important;
 }
-
-
-
-
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span { color: #0F172A !important; }
 [data-testid="stSidebar"] .stRadio > div { gap: 4px; }
-
 
 /* Sidebar logo strip */
 .sidebar-logo {
     background: linear-gradient(135deg, #0066CC 0%, #0EA5E9 100%);
     margin: -1rem -1rem 1.5rem -1rem;
     padding: 1.2rem 1.5rem;
-    border-bottom: 1px solid #1E3A5F;
+    border-bottom: 2px solid #0066CC;
 }
 .sidebar-logo h2 { color: white !important; font-size: 1.1rem; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
-.sidebar-logo span { color: rgba(255,255,255,0.65) !important; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.sidebar-logo span { color: rgba(255,255,255,0.85) !important; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
 
 /* Sidebar section headers */
 .sidebar-section {
-    color: #475569 !important;
+    color: #0066CC !important;
     font-size: 0.68rem !important;
+    font-weight: 700 !important;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    padding: 0.5rem 0 0.3rem;
-    border-top: 1px solid #1E3A5F;
+    padding: 0.6rem 0 0.3rem;
+    border-top: 1px solid #E2E8F0;
     margin-top: 0.5rem;
 }
 
