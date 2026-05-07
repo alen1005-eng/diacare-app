@@ -13,6 +13,11 @@ st.set_page_config(
     page_icon="🩺",
     layout="wide",
     initial_sidebar_state="expanded",
+    menu_items={
+        "Get Help": None,
+        "Report a bug": None,
+        "About": "DiaCare AI · AI4Health.Cro · v2.0"
+    }
 )
 
 # ─────────────────────────────────────────────
@@ -685,7 +690,14 @@ with st.sidebar:
             st.session_state.sb_med    = 4
             st.session_state.sb_hba1c  = 1
             st.session_state.sb_name   = "Marko Horvat"
-            st.rerun()
+            st.session_state.analyzed  = True
+            tier_code, non_adh_rate    = classify_patient("DA", 42, 4, "NE")
+            st.session_state.tier      = tier_code
+            st.session_state.rate      = non_adh_rate
+            st.session_state.age       = 42
+            st.session_state.med_count = 4
+            st.session_state.hba1c_done= "NE"
+            st.session_state.is_new    = "DA"
     with col_s2:
         if st.button("🟡\nSrednji", use_container_width=True):
             st.session_state.sb_is_new = 0
@@ -693,7 +705,14 @@ with st.sidebar:
             st.session_state.sb_med    = 2
             st.session_state.sb_hba1c  = 0
             st.session_state.sb_name   = "Ana Kovač"
-            st.rerun()
+            st.session_state.analyzed  = True
+            tier_code, non_adh_rate    = classify_patient("DA", 52, 2, "DA")
+            st.session_state.tier      = tier_code
+            st.session_state.rate      = non_adh_rate
+            st.session_state.age       = 52
+            st.session_state.med_count = 2
+            st.session_state.hba1c_done= "DA"
+            st.session_state.is_new    = "DA"
     with col_s3:
         if st.button("🟢\nNizak", use_container_width=True):
             st.session_state.sb_is_new = 0
@@ -701,7 +720,14 @@ with st.sidebar:
             st.session_state.sb_med    = 1
             st.session_state.sb_hba1c  = 0
             st.session_state.sb_name   = "Ivan Blažević"
-            st.rerun()
+            st.session_state.analyzed  = True
+            tier_code, non_adh_rate    = classify_patient("DA", 61, 1, "DA")
+            st.session_state.tier      = tier_code
+            st.session_state.rate      = non_adh_rate
+            st.session_state.age       = 61
+            st.session_state.med_count = 1
+            st.session_state.hba1c_done= "DA"
+            st.session_state.is_new    = "DA"
 
     st.markdown('<div class="sidebar-section">👤 Podaci pacijenta</div>', unsafe_allow_html=True)
     patient_name = st.text_input("Ime pacijenta", value=st.session_state.sb_name)
