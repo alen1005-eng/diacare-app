@@ -868,7 +868,7 @@ else:
 
         with g_col:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
-            st.plotly_chart(make_gauge(rate), use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(make_gauge(rate), use_container_width=True, config=dict(displayModeBar=False))
             # Probability bar
             st.markdown(f"""
             <div style="margin-top:-0.5rem">
@@ -973,7 +973,7 @@ else:
             )
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
             st.markdown('<div class="section-title">🎯 Relativna važnost prediktora</div>', unsafe_allow_html=True)
-            st.plotly_chart(fig_fi, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_fi, use_container_width=True, config=dict(displayModeBar=False))
             st.markdown('</div>', unsafe_allow_html=True)
 
             # Clinical reasoning card
@@ -1131,20 +1131,20 @@ else:
         with p1:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
             st.markdown('<div class="section-title">📊 Stopa neadherencije po Tier-ovima</div>', unsafe_allow_html=True)
-            st.plotly_chart(make_population_chart(), use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(make_population_chart(), use_container_width=True, config=dict(displayModeBar=False))
             st.markdown('</div>', unsafe_allow_html=True)
 
         with p2:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
             st.markdown('<div class="section-title">🥧 Raspodjela rizičnih skupina</div>', unsafe_allow_html=True)
-            st.plotly_chart(make_pie_chart(), use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(make_pie_chart(), use_container_width=True, config=dict(displayModeBar=False))
             st.markdown('</div>', unsafe_allow_html=True)
 
         p3, p4 = st.columns(2)
         with p3:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
             st.markdown('<div class="section-title">📈 Trend adherencije — simulacija intervencije</div>', unsafe_allow_html=True)
-            st.plotly_chart(make_trend_chart(), use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(make_trend_chart(), use_container_width=True, config=dict(displayModeBar=False))
             st.markdown('</div>', unsafe_allow_html=True)
 
         with p4:
@@ -1196,7 +1196,7 @@ else:
         with e2:
             st.markdown('<div class="section-card">', unsafe_allow_html=True)
             st.markdown('<div class="section-title">💰 Procijenjene uštede — kohortna analiza</div>', unsafe_allow_html=True)
-            st.plotly_chart(make_cost_chart(), use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(make_cost_chart(), use_container_width=True, config=dict(displayModeBar=False))
 
             st.markdown("""
             <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:10px;padding:1rem 1.2rem;margin-top:0.5rem">
@@ -1237,7 +1237,7 @@ else:
                 legend=dict(font=dict(size=9), orientation="h", y=1.15),
                 font=dict(family="DM Sans"),
             )
-            st.plotly_chart(fig_cost_comp, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_cost_comp, use_container_width=True, config=dict(displayModeBar=False))
             st.markdown('</div>', unsafe_allow_html=True)
 
     # ═══════════════════════════════════════════
