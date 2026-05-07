@@ -39,12 +39,12 @@ html, body, [data-testid="stAppViewContainer"] {
     background: #0A1628 !important;
     border-right: 1px solid #1E3A5F;
 }
-[data-testid="stSidebar"] * { color: #CBD5E1 !important; }
-[data-testid="stSidebar"] .stSelectbox label,
-[data-testid="stSidebar"] .stRadio label,
-[data-testid="stSidebar"] .stNumberInput label { color: #94A3B8 !important; font-size: 0.78rem !important; text-transform: uppercase; letter-spacing: 0.05em; }
+
+
+
+
 [data-testid="stSidebar"] .stRadio > div { gap: 4px; }
-[data-testid="stSidebar"] input, [data-testid="stSidebar"] select { background: #1E3A5F !important; border: 1px solid #2D5A8E !important; color: #E2E8F0 !important; border-radius: 6px !important; }
+
 
 /* Sidebar logo strip */
 .sidebar-logo {
